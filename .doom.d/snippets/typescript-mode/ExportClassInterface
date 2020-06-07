@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Export Default Class Interface
+# key: eci
+# condition: (tide-mode)
+# --
+export class $1 implements $2 {
+  $0
+}

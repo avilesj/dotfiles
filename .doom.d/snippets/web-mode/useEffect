@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: useEffect React Hook
+# key: rhue
+# condition: (tide-mode)
+# --
+useEffect(() => {
+  $0
+},[$1])

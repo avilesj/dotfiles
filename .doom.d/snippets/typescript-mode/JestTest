@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: Jest File body
+# key: jt
+# condition: (tide-mode)
+# --
+describe("$1", () => {
+
+  beforeAll(() => {
+
+  })
+
+  afterAll(() => {
+
+  })
+
+  describe("$2", () => {
+    it("$3", () => {
+
+    });
+  });
+});

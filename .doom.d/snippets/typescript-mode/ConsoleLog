@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Console Log
+# key: clog
+# condition: (tide-mode)
+# --
+console.log(\`$1\`);

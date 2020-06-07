@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: useState React Hook
+# key: rhus
+# condition: (tide-mode)
+# --
+const [${1:variable}, ${2:setVariable}] = useState(${3:defaultValue});

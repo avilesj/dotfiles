@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: Jest Test Method
+# key: jtm
+# condition: (tide-mode)
+# --
+describe("$1", () => {
+  it("$2", $3 () => {
+
+  });
+});

@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Export Default Interface
+# key: edi
+# condition: (tide-mode)
+# --
+export default interface $1 {
+  $0
+}

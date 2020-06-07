@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Jest Test Case
+# key: jtc
+# condition: (tide-mode)
+# --
+it("$1", $2 () => {
+
+});

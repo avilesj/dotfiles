@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Export Default Class
+# key: edc
+# condition: (tide-mode)
+# --
+export default class $1 {
+  $0
+}
