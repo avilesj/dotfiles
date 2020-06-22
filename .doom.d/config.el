@@ -52,9 +52,18 @@
 ;;
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                      ;
+;                     GLOBALS                          ;
+;                                                      ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (setq doom-theme 'doom-snazzy)
 (setq tab-width 2)
 (setq evil-auto-indent nil)
+(setq treemacs-width 30)
+(setq highlight-indent-guides-method 'character)
 (global-prettify-symbols-mode t)
 (setq-default prettify-symbols-alist '(("lambda" . ?λ)
                                        ("->" . ?→)
@@ -73,17 +82,78 @@
                                        ("||" . ?∨)
                                        ("not" . ?¬)))
 (setq plantuml-output-type "png")
+(setq debug-on-error t)
+
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 ;; FUNCTIONS
+(defun golem/treemacs (&optional args)
+  (interactive)
+  (if (eq (treemacs-current-visibility) 'visible)
+      (progn
+        (evil-window-next 0)
+        (treemacs-display-current-project-exclusively)
+        )
+      )
+  )
+(defun golem/project-setup ()
+  (interactive)
+  (treemacs)
+  (flycheck-list-errors)
+  )
+(defun golem/setup-flycheck-mode (&optional args)
+  (interactive)
+  (add-to-list 'display-buffer-alist
+               `(,"^\\*Flycheck errors\\*$"
+                 (display-buffer-reuse-window
+                  display-buffer-in-side-window)
+                 (side            . right)
+                 (reusable-frames . visible)
+                 (window-width   . 0.25)))
+  )
+
+;; ADVICES
+(advice-add 'flycheck-mode :before #'golem/setup-flycheck-mode)
+(advice-add 'treemacs :after #'golem/treemacs)
+;; HOOKS
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                      ;
+;                       JAVA                           ;
+;                                                      ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun golem/setup-java-mode ()
+  (interactive)
+  (require 'dap-java)
+  (subword-mode)
+  (dap-mode)
+  (dap-ui-mode)
+  (setq gc-cons-threshold 100000000)
+  (setq read-process-output-max (* 1024 1024)) ;; 1mb
+  (setq lsp-idle-delay 0.500)
+  (ggtags-mode)
+  )
+(add-hook 'java-mode-hook 'golem/setup-java-mode)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                      ;
+;                    JAVASCRIPT                        ;
+;                                                      ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun golem/tide-format ()
+  (interactive)
+(if (bound-and-true-p tide-mode)
+    (lambda ()
+      (tide-format)
+      (save-buffer)
+      (revert-buffer (buffer-file-name) t)
+      )
+  )
+)
 (defun golem/setup-tide-mode ()
   (interactive)
   (setq flycheck-checker 'javascript-eslint)
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
   (setq typescript-indent-level 2)
   (flycheck-add-next-checker 'javascript-eslint 'typescript-tide)
-
-;;  (setq flycheck-check-syntax-automatically '(save mode-enabled))
-;;  (setq flycheck-checker 'javascript-eslint)
-  )
 (defun golem/typescript-eslint-fix-file ()
   (interactive)
   (let* ((root (locate-dominating-file
@@ -98,31 +168,48 @@
          )
   (revert-buffer (buffer-file-name) t)
   )
-(defun golem/tide-format ()
-  (interactive)
-(if (bound-and-true-p tide-mode)
-    (lambda ()
-      (tide-format)
-      (save-buffer)
-      (revert-buffer (buffer-file-name) t)
-      )
-  )
-)
-;; HOOKS
-;;
 
 (add-hook 'tide-mode-hook
           (lambda ()
             (add-hook 'after-save-hook #'golem/tide-format)
             (add-hook 'tide-mode-hook 'golem/setup-tide-mode)
             ))
-
 ;; INITS
 (with-eval-after-load 'projectile
-     (define-key projectile-mode-map [f6] 'projectile-test-project)
-     (define-key projectile-mode-map [f5] 'projectile-run-project)
+  (define-key projectile-mode-map [f6] 'projectile-test-project)
+  (define-key projectile-mode-map [f5] 'projectile-run-project)
+  (define-key projectile-mode-map [f4] 'projectile-compile-project)
+  (define-key projectile-mode-map [f9] 'treemacs)
 )
 
 (with-eval-after-load 'tide
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                      ;
+;                MISC/AUTOMATED                        ;
+;                                                      ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(safe-local-variable-values
+   '((projectile-project-compilation-cmd . "mvn -DskipTests package")
+     (projectile-project-run-cmd . "mvn")
+     (projectile-project-compilation-cmd . "mvn package")
+     (projectile-project-test-cmd . "mvn test")
+     (eval advice-add 'projectile-test-project :before
+           (lambda
+             (&rest r)
+             (setenv "TESTREGEXP"
+                     (read-string "Execute file pattern: "))))
+     (projectile-project-test-cmd . "make test"))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

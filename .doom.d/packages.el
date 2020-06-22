@@ -48,3 +48,8 @@
 ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
+
+(package! ggtags)
+(package! highlight-indent-guides)
+(package! dap-mode)
+(package! posframe)
