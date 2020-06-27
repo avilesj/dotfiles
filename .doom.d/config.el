@@ -148,12 +148,14 @@
       )
   )
 )
+
 (defun golem/setup-tide-mode ()
   (interactive)
   (setq flycheck-checker 'javascript-eslint)
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
   (setq typescript-indent-level 2)
   (flycheck-add-next-checker 'javascript-eslint 'typescript-tide)
+)
 (defun golem/typescript-eslint-fix-file ()
   (interactive)
   (let* ((root (locate-dominating-file
@@ -191,6 +193,28 @@
 ;                MISC/AUTOMATED                        ;
 ;                                                      ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Overriding doom internals
+
+;; Shell window height. Structure is the same, values are different
+  (add-to-list 'display-buffer-alist
+               `(,"^\\*doom:\\(?:v?term\\|e?shell\\)-popup"
+                 (+popup-buffer)
+                 (actions)
+                 (side . bottom)
+                 (size . 0.15)
+                 (window-width . 40)
+                 (window-height . 0.35)
+                 (slot)
+                 (vslot . -5)
+                 (window-parameters
+                  (ttl)
+                  (quit)
+                  (select . t)
+                  (modeline)
+                  (autosave)
+                  (transient . t)
+                  (no-other-window . t))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
