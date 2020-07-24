@@ -98,21 +98,46 @@
 (defun golem/project-setup ()
   (interactive)
   (treemacs)
-  (flycheck-list-errors)
+  (golem/project-setup-flycheck)
+  (golem/project-setup-terminal)
   )
-(defun golem/setup-flycheck-mode (&optional args)
+
+(defun golem/project-setup-terminal ()
+  (interactive)
+  (add-to-list 'display-buffer-alist
+             `(,"^\\*doom:\\(?:v?term\\|e?shell\\)-popup"
+               (+popup-buffer)
+               (actions)
+               (side . bottom)
+               (size . 0.15)
+               (window-width . 40)
+               (window-height . 0.35)
+               (slot)
+               (vslot . -5)
+               (window-parameters
+                (ttl)
+                (quit)
+                (select . t)
+                (modeline)
+                (autosave)
+                (transient . t)
+                (no-other-window . t))))
+  (+eshell/toggle nil)
+  )
+(defun golem/project-setup-flycheck ()
   (interactive)
   (add-to-list 'display-buffer-alist
                `(,"^\\*Flycheck errors\\*$"
                  (display-buffer-reuse-window
                   display-buffer-in-side-window)
                  (side            . right)
+                 (size . 0.15)
                  (reusable-frames . visible)
                  (window-width   . 0.25)))
+  (flycheck-list-errors)
   )
 
 ;; ADVICES
-(advice-add 'flycheck-mode :before #'golem/setup-flycheck-mode)
 (advice-add 'treemacs :after #'golem/treemacs)
 ;; HOOKS
 
@@ -133,6 +158,16 @@
   (ggtags-mode)
   )
 (add-hook 'java-mode-hook 'golem/setup-java-mode)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                      ;
+;                       RUBY                           ;
+;                                                      ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun golem/setup-ruby-mode ()
+  (interactive)
+  (flycheck-mode t)
+  )
+(add-hook 'ruby-mode-hook 'golem/setup-ruby-mode)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;                                                      ;
 ;                    JAVASCRIPT                        ;
@@ -184,6 +219,11 @@
   (define-key projectile-mode-map [f9] 'treemacs)
 )
 
+(with-eval-after-load 'treemacs
+  (define-key treemacs-mode-map [f1] 'treemacs-create-file)
+  (define-key treemacs-mode-map [f2] 'treemacs-create-dir)
+)
+
 (with-eval-after-load 'tide
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
 )
@@ -197,24 +237,6 @@
 ;; Overriding doom internals
 
 ;; Shell window height. Structure is the same, values are different
-  (add-to-list 'display-buffer-alist
-               `(,"^\\*doom:\\(?:v?term\\|e?shell\\)-popup"
-                 (+popup-buffer)
-                 (actions)
-                 (side . bottom)
-                 (size . 0.15)
-                 (window-width . 40)
-                 (window-height . 0.35)
-                 (slot)
-                 (vslot . -5)
-                 (window-parameters
-                  (ttl)
-                  (quit)
-                  (select . t)
-                  (modeline)
-                  (autosave)
-                  (transient . t)
-                  (no-other-window . t))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
