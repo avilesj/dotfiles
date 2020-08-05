@@ -53,3 +53,4 @@
 (package! highlight-indent-guides)
 (package! dap-mode)
 (package! posframe)
+(package! exec-path-from-shell)

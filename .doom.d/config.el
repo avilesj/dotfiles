@@ -58,7 +58,7 @@
 ;                     GLOBALS                          ;
 ;                                                      ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+(exec-path-from-shell-initialize)
 (setq doom-theme 'doom-snazzy)
 (setq tab-width 2)
 (setq evil-auto-indent nil)
@@ -82,7 +82,6 @@
                                        ("||" . ?∨)
                                        ("not" . ?¬)))
 (setq plantuml-output-type "png")
-(setq debug-on-error t)
 
 (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 ;; FUNCTIONS
