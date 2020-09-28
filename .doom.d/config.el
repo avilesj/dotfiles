@@ -120,8 +120,10 @@
                 (modeline)
                 (autosave)
                 (transient . t)
+                (no-delete-other-windows . t)
                 (no-other-window . t))))
   (+eshell/toggle nil)
+  (sticky-buffer-mode)
   )
 (defun golem/project-setup-flycheck ()
   (interactive)
@@ -136,6 +138,12 @@
   (flycheck-list-errors)
   )
 
+;; MODES
+(define-minor-mode sticky-buffer-mode
+  "Make the current window always display this buffer."
+  nil " sticky" nil
+  (set-window-dedicated-p (selected-window) sticky-buffer-mode)
+  )
 ;; ADVICES
 (advice-add 'treemacs :after #'golem/treemacs)
 ;; HOOKS
