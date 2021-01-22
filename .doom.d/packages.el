@@ -54,3 +54,4 @@
 (package! dap-mode)
 (package! posframe)
 (package! exec-path-from-shell)
+(package! org-bullets)

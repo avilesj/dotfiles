@@ -58,13 +58,18 @@
 ;                     GLOBALS                          ;
 ;                                                      ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq debug-on-error t)
+(setq projectile-globally-ignored-directories '("~/.emacs.d/.local" "*node_modules" "dist"))
+(global-flycheck-mode t)
 (exec-path-from-shell-initialize)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 (setq doom-theme 'doom-snazzy)
 (setq tab-width 2)
 (setq evil-auto-indent nil)
 (setq treemacs-width 30)
 (setq highlight-indent-guides-method 'character)
 (global-prettify-symbols-mode t)
+(global-company-mode t)
 (setq-default prettify-symbols-alist '(("lambda" . ?λ)
                                        ("->" . ?→)
                                        ("->>" . ?↠)
@@ -97,8 +102,8 @@
 (defun golem/project-setup ()
   (interactive)
   (treemacs)
-  (golem/project-setup-flycheck)
   (golem/project-setup-terminal)
+  (golem/project-setup-flycheck)
   )
 
 (defun golem/project-setup-terminal ()
@@ -123,10 +128,10 @@
                 (no-delete-other-windows . t)
                 (no-other-window . t))))
   (+eshell/toggle nil)
-  (sticky-buffer-mode)
   )
 (defun golem/project-setup-flycheck ()
   (interactive)
+  (flycheck-mode +1)
   (add-to-list 'display-buffer-alist
                `(,"^\\*Flycheck errors\\*$"
                  (display-buffer-reuse-window
@@ -134,7 +139,11 @@
                  (side            . right)
                  (size . 0.15)
                  (reusable-frames . visible)
-                 (window-width   . 0.25)))
+                 (window-width   . 0.25)
+                 (window-parameters
+                  (no-delete-other-windows . t)
+                  )
+                 ))
   (flycheck-list-errors)
   )
 
@@ -148,6 +157,13 @@
 (advice-add 'treemacs :after #'golem/treemacs)
 ;; HOOKS
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                      ;
+;                   KEYBINDS                           ;
+;                                                      ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(map! :map projectile-mode-map :n "SPC p w" #'+helm/project-search)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;                                                      ;
 ;                       JAVA                           ;
@@ -170,9 +186,13 @@
 ;                       RUBY                           ;
 ;                                                      ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(push 'company-robe company-backends)
 (defun golem/setup-ruby-mode ()
   (interactive)
   (flycheck-mode t)
+  (robe-mode)
+  (company-mode +1)
+  (robe-start t)
   )
 (add-hook 'ruby-mode-hook 'golem/setup-ruby-mode)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -182,17 +202,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun golem/tide-format ()
   (interactive)
-(if (bound-and-true-p tide-mode)
-    (lambda ()
-      (tide-format)
-      (save-buffer)
-      (revert-buffer (buffer-file-name) t)
-      )
+  (if (bound-and-true-p tide-mode)
+    ;  (tide-format)
+    ;  (abbrev-edit-save-buffer)
+    ;  (revert-buffer (buffer-file-name) t)
+      (golem/typescript-eslint-fix-file)
   )
 )
 
 (defun golem/setup-tide-mode ()
   (interactive)
+  (tide-setup)
+  (tide-hl-identifier-mode +1)
+  (company-mode +1)
   (setq flycheck-checker 'javascript-eslint)
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
   (setq typescript-indent-level 2)
@@ -207,16 +229,20 @@
           (and root
                (expand-file-name "node_modules/.bin/eslint"
                                  root))))
-         (shell-command (concat eslint " --fix " (buffer-file-name)))
-         (message (concat eslint " --fix " (buffer-file-name)))
-         )
-  (revert-buffer (buffer-file-name) t)
+         (shell-command (concat eslint " --fix " (buffer-file-name)) nil nil)
+         (revert-buffer (buffer-file-name) t)
+    ;(set-process-sentinel
+    ;     (start-process-shell-command "Shell" "*Output*" (concat eslint " --fix " (buffer-file-name)))
+    ;     (lambda (_ _) (revert-buffer (buffer-file-name) t))
+    ;     ;(message (concat eslint " --fix " (buffer-file-name)))
+    ;     ;(revert-buffer (buffer-file-name) t)
+    ;     )
+    )
   )
 
-(add-hook 'tide-mode-hook
+(add-hook 'typescript-tsx-mode-hook
           (lambda ()
-            (add-hook 'after-save-hook #'golem/tide-format)
-            (add-hook 'tide-mode-hook 'golem/setup-tide-mode)
+            (golem/setup-tide-mode)
             ))
 ;; INITS
 (with-eval-after-load 'projectile
